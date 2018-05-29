@@ -2,13 +2,12 @@ import sys
 import numpy
 from random import randint as ri
 
-
 VOCAB = 29
 
 
 # print out usage info
 def usage():
-    print("Usage: need one argument as matrix length", file=sys.stderr)
+    print("Usage: need 2 argument as matrix length and message", file=sys.stderr)
 
 
 # find the modular multiplicative inverse of 'a' under modulo 'm'
@@ -46,21 +45,55 @@ def inverse(matrix, result, dimension):
     print(matrix)
     print(result)
     print('*' * 33)
-    for i in range(dimension):
-        multi = mod_inverse(matrix[i][i], VOCAB)
-        matrix[i] = list(map(lambda x: (x * multi) % VOCAB, matrix[i]))
-        result[i] = list(map(lambda x: (x * multi) % VOCAB, result[i]))
-
-    print(matrix)
-    print(result)
+    # inverse using only multiplication and modular
+    for col in range(dimension):
+        multi = mod_inverse(matrix[col][col], VOCAB)
+        matrix[col] = list(map(lambda x: (x * multi) % VOCAB, matrix[col]))
+        result[col] = list(map(lambda x: (x * multi) % VOCAB, result[col]))
+        print(matrix)
+        print(result)
+        print('*' * 33 + str(col))
+        print("we're in ref now...")
+        for row in range(dimension):
+            if row == col:
+                continue
+            if matrix[row][col] == 0:
+                continue
+            tmp_m_row = list(map(lambda x: (x * matrix[row][col]) % VOCAB, matrix[col]))
+            print(tmp_m_row)
+            tmp_r_row = list(map(lambda x: (x * matrix[row][col]) % VOCAB, result[col]))
+            print(tmp_r_row)
+            matrix[row] = [de_negative(a - b) for a, b in zip(matrix[row], tmp_m_row)]
+            result[row] = [de_negative(a - b) for a, b in zip(result[row], tmp_r_row)]
+            print(matrix)
+            print(result)
+            print('*' * 33 + str(row))
+        print("we're out of ref...")
+    # print(matrix)
+    # print(result)
+    # print('*' * 33)
     return result
 
 
 # use modular arithmetic to reverse negative numbers
-def de_negative (m):
+def de_negative(m):
     while m < 0:
         m += VOCAB
     return m
+
+
+def check0(matrix, dimension):
+    for i in range(dimension):
+        if matrix[i][i] == 0:
+            return True
+    return False
+
+
+def encode(vector, matrix):
+    a = numpy.array(matrix)
+    b = numpy.array(vector)
+    result = a.dot(b).tolist()
+    return list(map(lambda x: x % VOCAB, result))
 
 
 # main method
@@ -69,13 +102,28 @@ def main():
         usage()
         sys.exit(0)
     dimension = int(sys.argv[1])
+    # message = [ord(c) for c in str(sys.argv[2])]
     matrix = randomize(dimension)
     print("our matrix of choice is:")
     print(matrix)
-    while numpy.linalg.matrix_rank(matrix) != dimension:
+    while numpy.linalg.matrix_rank(matrix) != dimension or check0(matrix, dimension):
         matrix = randomize(dimension)
     result = identity(dimension)
     inverted_matrix = inverse(matrix, result, dimension)
+    print('hopefully final result:')
+    print(inverted_matrix)
+
+    message = [1, 2, 3]
+    print(message)
+    cipher = encode(message, matrix)
+    message = encode(cipher, result)
+    print(message)
+    # print(message)
+    # message = list(map(lambda x: x - 97, message))
+    # cipher = encode(message, matrix)
+    # message = list(map(lambda x: x + 97, encode(cipher, result)))
+    # print(message)
+    # print(''.join(chr(i) for i in message))
 
 
 if __name__ == '__main__':

@@ -1,3 +1,8 @@
+from operator import add
+
 m = [1, 2, 3, 4, 5]
-m = list(map(lambda x: x * 3, m))
-print(m)
+m2 = [6, 7, 8, 9, 10]
+m3 = list(map(add, m, m2))
+m4 = [a + b for a, b in zip(m, m2)]
+print(m3)
+print(m4)
