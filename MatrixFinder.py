@@ -1,6 +1,7 @@
 import sys
 import numpy
 from random import randint as ri
+from copy import deepcopy
 
 VOCAB = 29
 
@@ -41,37 +42,23 @@ def randomize(dimension):
 
 
 # inverse an n*n matrix with modular
-def inverse(matrix, result, dimension):
-    print(matrix)
-    print(result)
-    print('*' * 33)
+def inverse(my_matrix, my_result, dimension):
+    matrix = deepcopy(my_matrix)
+    result = deepcopy(my_result)
     # inverse using only multiplication and modular
     for col in range(dimension):
         multi = mod_inverse(matrix[col][col], VOCAB)
         matrix[col] = list(map(lambda x: (x * multi) % VOCAB, matrix[col]))
         result[col] = list(map(lambda x: (x * multi) % VOCAB, result[col]))
-        print(matrix)
-        print(result)
-        print('*' * 33 + str(col))
-        print("we're in ref now...")
         for row in range(dimension):
             if row == col:
                 continue
             if matrix[row][col] == 0:
                 continue
             tmp_m_row = list(map(lambda x: (x * matrix[row][col]) % VOCAB, matrix[col]))
-            print(tmp_m_row)
             tmp_r_row = list(map(lambda x: (x * matrix[row][col]) % VOCAB, result[col]))
-            print(tmp_r_row)
             matrix[row] = [de_negative(a - b) for a, b in zip(matrix[row], tmp_m_row)]
             result[row] = [de_negative(a - b) for a, b in zip(result[row], tmp_r_row)]
-            print(matrix)
-            print(result)
-            print('*' * 33 + str(row))
-        print("we're out of ref...")
-    # print(matrix)
-    # print(result)
-    # print('*' * 33)
     return result
 
 
@@ -92,38 +79,41 @@ def check0(matrix, dimension):
 def encode(vector, matrix):
     a = numpy.array(matrix)
     b = numpy.array(vector)
-    result = a.dot(b).tolist()
+    result = numpy.dot(a, b).tolist()
     return list(map(lambda x: x % VOCAB, result))
 
 
 # main method
 def main():
-    if len(sys.argv) != 2:
+    if len(sys.argv) != 3:
         usage()
         sys.exit(0)
     dimension = int(sys.argv[1])
-    # message = [ord(c) for c in str(sys.argv[2])]
+    message = [ord(c) for c in sys.argv[2]]
+
+    # randomly generate a matrix
     matrix = randomize(dimension)
     print("our matrix of choice is:")
     print(matrix)
     while numpy.linalg.matrix_rank(matrix) != dimension or check0(matrix, dimension):
         matrix = randomize(dimension)
     result = identity(dimension)
+
+    # invert a matrix.
     inverted_matrix = inverse(matrix, result, dimension)
-    print('hopefully final result:')
+    print('inverted matrix is: ')
     print(inverted_matrix)
 
-    message = [1, 2, 3]
-    print(message)
+    # begin showing of encoding and decoding
+    print('the message is: ' + ''.join(chr(i) for i in message))
+    message = list(map(lambda x: x - 97, message))
+    print('enc key is :' + str(matrix))
     cipher = encode(message, matrix)
-    message = encode(cipher, result)
-    print(message)
-    # print(message)
-    # message = list(map(lambda x: x - 97, message))
-    # cipher = encode(message, matrix)
-    # message = list(map(lambda x: x + 97, encode(cipher, result)))
-    # print(message)
-    # print(''.join(chr(i) for i in message))
+    ciphered_message = list(map(lambda x: x + 97, cipher))
+    print('ciphered message is: ' + ''.join(chr(i) for i in ciphered_message))
+    back_message = encode(cipher, inverted_matrix)
+    back_message = list(map(lambda x: x + 97, back_message))
+    print('deciphered message is: ' + ''.join(chr(i) for i in back_message))
 
 
 if __name__ == '__main__':
