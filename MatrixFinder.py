@@ -45,10 +45,12 @@ def randomize(dimension):
 def inverse(matrix, result, dimension):
     print(matrix)
     print(result)
+    print('*' * 33)
     for i in range(dimension):
         multi = mod_inverse(matrix[i][i], VOCAB)
         matrix[i] = list(map(lambda x: (x * multi) % VOCAB, matrix[i]))
         result[i] = list(map(lambda x: (x * multi) % VOCAB, result[i]))
+
     print(matrix)
     print(result)
     return result
