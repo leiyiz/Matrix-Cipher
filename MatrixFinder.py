@@ -55,10 +55,14 @@ def inverse(my_matrix, my_result, dimension):
                 continue
             if matrix[row][col] == 0:
                 continue
-            tmp_m_row = list(map(lambda x: (x * matrix[row][col]) % VOCAB, matrix[col]))
-            tmp_r_row = list(map(lambda x: (x * matrix[row][col]) % VOCAB, result[col]))
-            matrix[row] = [de_negative(a - b) for a, b in zip(matrix[row], tmp_m_row)]
-            result[row] = [de_negative(a - b) for a, b in zip(result[row], tmp_r_row)]
+            tmp_m_row = list(map(
+                lambda x: (x * matrix[row][col]) % VOCAB, matrix[col]))
+            tmp_r_row = list(map(
+                lambda x: (x * matrix[row][col]) % VOCAB, result[col]))
+            matrix[row] = [de_negative(a - b)
+                           for a, b in zip(matrix[row], tmp_m_row)]
+            result[row] = [de_negative(a - b)
+                           for a, b in zip(result[row], tmp_r_row)]
     return result
 
 
