@@ -97,10 +97,10 @@ def main():
 
     # randomly generate a matrix
     matrix = randomize(dimension)
-    print("our matrix of choice is:")
-    print(matrix)
     while numpy.linalg.matrix_rank(matrix) != dimension or check0(matrix, dimension):
         matrix = randomize(dimension)
+    print("our matrix of choice is:")
+    print(matrix)
     result = identity(dimension)
 
     # invert a matrix.
